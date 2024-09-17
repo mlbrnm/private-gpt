@@ -1,6 +1,13 @@
+## Purpose of Fork:
 This fork adds a fastapi middleware check that prevents direct connections to the web UI.
-This means you can use a reverse proxy to secure access to the WebUI. The server will only allow connections to the root of the server (where the webui is) if they include the `x-forwarded-for' header.
+
+This means you can use a reverse proxy to secure access to the WebUI. The server will only allow connections to the root of the server (where the webui is) if they include the `x-forwarded-for' header, indicating they passed through the reverse proxy.
+
 The only modified file is private-gpt/launcher.py.
+
+This was created to meet the needs of my specific workplace. It is unlikely to be a secure solution in any other circumstances.
+
+---------
 
 
 
