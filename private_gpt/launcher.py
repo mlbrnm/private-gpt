@@ -54,6 +54,27 @@ def create_app(root_injector: Injector) -> FastAPI:
             allow_headers=settings.server.cors.allow_headers,
         )
 
+    @app.middleware("http")
+    async def restrict_webui_access(request: Request, call_next):
+        # Log the request and headers for debugging. Uncomment to enable.
+        # logger.info(f"Processing request path: {request.url.path}")
+        # logger.info(f"Request headers: {request.headers}")
+
+        # Only apply the restriction for the WebUI root path and static files
+        if request.url.path == "/" or request.url.path.startswith("/static"):
+            # Check for the X-Forwarded-For header to determine if it's a proxy request
+            if not request.headers.get("x-forwarded-for"):
+                logger.warning("Direct access to WebUI detected, blocking request.")
+                raise HTTPException(status_code=403, detail="Access to WebUI forbidden. Use :8002")
+        
+        # Ensure the next middleware is called properly and a valid response is returned
+        try:
+            response = await call_next(request)
+            return response
+        except Exception as e:
+            logger.error(f"Error while processing request: {e}")
+            raise HTTPException(status_code=500, detail="Internal Server Error")
+
     if settings.ui.enabled:
         logger.debug("Importing the UI module")
         try:
