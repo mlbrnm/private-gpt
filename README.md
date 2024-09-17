@@ -1,3 +1,11 @@
+This fork adds a fastapi middleware check that prevents direct connections to the web UI.
+This means you can use a reverse proxy to secure access to the WebUI. The server will only allow connections to the root of the server (where the webui is) if they include the `x-forwarded-for' header.
+The only modified file is private-gpt/launcher.py.
+
+
+
+
+
 # 🔒 PrivateGPT 📑
 
 [![Tests](https://github.com/zylon-ai/private-gpt/actions/workflows/tests.yml/badge.svg)](https://github.com/zylon-ai/private-gpt/actions/workflows/tests.yml?query=branch%3Amain)
