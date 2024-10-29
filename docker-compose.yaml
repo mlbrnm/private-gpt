@@ -8,11 +8,12 @@ services:
   # This service builds from an external Dockerfile and runs the Ollama mode.
   private-gpt-ollama:
     image: ${PGPT_IMAGE:-zylonai/private-gpt}:${PGPT_TAG:-0.6.2}-ollama  # x-release-please-version
+    user: root
     build:
       context: .
       dockerfile: Dockerfile.ollama
     volumes:
-      - ./local_data/:/home/worker/app/local_data
+      - ./local_data:/home/worker/app/local_data
     ports:
       - "8001:8001"
     environment:
@@ -27,11 +28,15 @@ services:
       - ollama-cpu
       - ollama-cuda
       - ollama-api
+    depends_on:
+      ollama:
+        condition: service_healthy
 
   # Private-GPT service for the local mode
   # This service builds from a local Dockerfile and runs the application in local mode.
   private-gpt-llamacpp-cpu:
     image: ${PGPT_IMAGE:-zylonai/private-gpt}:${PGPT_TAG:-0.6.2}-llamacpp-cpu # x-release-please-version
+    user: root
     build:
       context: .
       dockerfile: Dockerfile.llamacpp-cpu
@@ -44,7 +49,7 @@ services:
     environment:
       PORT: 8001
       PGPT_PROFILES: local
-      HF_TOKEN: ${HF_TOKEN}
+      HF_TOKEN: ${HF_TOKEN:-}
     profiles:
       - llamacpp-cpu
 
@@ -56,8 +61,14 @@ services:
   # This will route requests to the Ollama service based on the profile.
   ollama:
     image: traefik:v2.10
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget -q --spider http://ollama:11434 || exit 1"]
+      interval: 10s
+      retries: 3
+      start_period: 5s
+      timeout: 5s
     ports:
-      - "8081:8080"
+      - "8080:8080"
     command:
       - "--providers.file.filename=/etc/router.yml"
       - "--log.level=ERROR"
@@ -79,6 +90,8 @@ services:
   # Ollama service for the CPU mode
   ollama-cpu:
     image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
     volumes:
       - ./models:/root/.ollama
     profiles:
@@ -88,6 +101,8 @@ services:
   # Ollama service for the CUDA mode
   ollama-cuda:
     image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
     volumes:
       - ./models:/root/.ollama
     deploy:
