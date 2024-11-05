@@ -2,7 +2,7 @@
 
 import logging
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends, FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from injector import Injector
 from llama_index.core.callbacks import CallbackManager
