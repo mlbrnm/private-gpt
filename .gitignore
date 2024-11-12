@@ -32,3 +32,4 @@ __pycache__/
 certs/WSMWSLLM01.healthy.bewell.ca.cer
 certs/WSMWSLLM01.healthy.bewell.ca.key
 certs/WSMWSLLM01.healthy.bewell.ca.pem
+backup_local_data/local_data/.gitignore
